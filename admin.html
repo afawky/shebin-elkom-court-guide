@@ -15,22 +15,10 @@
   </section>
   <section id="dashboard" hidden>
     <div class="dashboard-head"><div><span class="eyebrow">لوحة التحكم</span><h1>إدارة محتوى الدليل</h1><p id="whoami" class="muted"></p></div><button id="logout" class="secondary">تسجيل الخروج</button></div>
-    <section class="panel settings-panel"><span class="eyebrow">هوية الموقع</span><h2>إعدادات الواجهة وبيانات التواصل</h2>
-<form id="settings-form" class="settings-grid">
-<label>اسم الموقع<input id="setting-title" required></label><label>العنوان الفرعي<input id="setting-subtitle"></label>
-<label>عنوان الترحيب<input id="setting-hero-title"></label><label>النص التعريفي<input id="setting-hero-description"></label>
-<label>النص أسفل الموقع<input id="setting-footer"></label><label>رقم الهاتف<input id="setting-phone"></label>
-<label>البريد الإلكتروني<input id="setting-email" type="email"></label><label>العنوان<input id="setting-address"></label>
-<label>رابط صفحة فيسبوك<input id="setting-facebook" type="url"></label>
-<label>شعار الموقع<input id="setting-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
-<label>صورة الواجهة الرئيسية<input id="setting-hero-image" type="file" accept="image/png,image/jpeg,image/webp"></label>
-<div class="settings-actions"><button class="primary" type="submit">حفظ إعدادات الموقع</button></div>
-</form><p class="muted">اترك اختيار الصورة فارغًا للاحتفاظ بالصورة الحالية.</p></section>
-<div class="admin-grid">
+    <div class="admin-grid">
       <section class="panel"><h2>إضافة دور</h2><form id="floor-form"><label>اسم الدور<input id="floor-name" required placeholder="مثال: الدور الأول"></label><label>وصف مختصر<input id="floor-desc" placeholder="اختياري"></label><button class="primary">إضافة الدور</button></form></section>
       <section class="panel"><h2>إضافة مكتب</h2><form id="office-form"><label>اسم المكتب<input id="office-name" required placeholder="مثال: قلم الكتاب"></label><label>الدور<select id="office-floor" required></select></label><label>رقم الغرفة<input id="office-room" placeholder="مثال: 105"></label><label>وصف الوصول<textarea id="office-location" rows="2" placeholder="وصف يساعد الزائر على الوصول"></textarea></label><label>رقم الهاتف<input id="office-phone"></label><button class="primary">إضافة المكتب</button></form></section>
-      <section class="panel"><h2>إضافة صور لمكتب</h2><form id="image-form"><label>اختار المكتب<select id="image-office" required></select></label><label>اختار صورة أو أكثر<input id="office-files" type="file" accept="image/png,image/jpeg,image/webp" multiple required></label><button class="primary">رفع الصور</button></form><p class="muted">الصور ستظهر في بطاقة المكتب بالدليل العام.</p></section>
-<section class="panel"><h2>إضافة خدمة</h2><form id="service-form"><label>المكتب<select id="service-office" required></select></label><label>اسم الخدمة<input id="service-name" required placeholder="مثال: استخراج صورة رسمية"></label><label>تفاصيل الخدمة<textarea id="service-desc" rows="2"></textarea></label><button class="primary">إضافة الخدمة</button></form></section>
+      <section class="panel"><h2>إضافة خدمة</h2><form id="service-form"><label>المكتب<select id="service-office" required></select></label><label>اسم الخدمة<input id="service-name" required placeholder="مثال: استخراج صورة رسمية"></label><label>تفاصيل الخدمة<textarea id="service-desc" rows="2"></textarea></label><button class="primary">إضافة الخدمة</button></form></section>
     </div>
     <section class="panel records"><div class="section-head"><div><span class="eyebrow">المحتوى الحالي</span><h2>المكاتب والخدمات</h2></div><button id="refresh" class="secondary">تحديث القائمة</button></div><div id="admin-records">جارٍ التحميل...</div></section>
     <p id="admin-message" class="status" role="status"></p>

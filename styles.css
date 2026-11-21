@@ -6,3 +6,12 @@
 
 /* Full-site background customization */
 .background-controls{border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px}.background-controls h3{margin:0 0 8px;font-size:16px}.background-controls input[type="color"]{height:46px;padding:4px;max-width:180px}
+
+/* Ministry of Justice prominent hero shortcut */
+.ministry-link{display:flex;align-items:center;gap:13px;width:fit-content;max-width:100%;margin:-8px 0 22px;padding:11px 18px;border:1px solid rgba(255,255,255,.38);border-radius:14px;background:rgba(255,255,255,.13);color:#fff;text-decoration:none;backdrop-filter:blur(5px);transition:background .2s ease,transform .2s ease}
+.ministry-link:hover{background:rgba(255,255,255,.23);transform:translateY(-2px)}
+.ministry-link-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:11px;background:#c69a4a;color:#173b34;font-size:24px;font-weight:800}
+.ministry-link strong,.ministry-link small{display:block}
+.ministry-link strong{font-size:14px}
+.ministry-link small{font-size:11px;color:#dce9e3}
+@media(max-width:600px){.ministry-link{width:100%;margin-bottom:18px}.ministry-link small{font-size:10px}}

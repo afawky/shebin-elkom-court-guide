@@ -32,6 +32,9 @@ async function loadDirectory(){
     facebook: row.facebook_url || "",
     hero_image: row.hero_image_url || "",
     logo: row.logo_url || "",
+    background_mode: row.background_mode || "color",
+    background_color: row.background_color || "#f4f7f5",
+    background_image: row.background_image_url || "",
     ministry_url: "https://moj.gov.eg/services/courts/10050004"
   };
   applySiteSettings();
@@ -41,6 +44,18 @@ async function loadDirectory(){
   render();
 }
 function applySiteSettings(){
+ const mode=siteSettings.background_mode||"color";
+ if(mode==="image"&&siteSettings.background_image){
+  document.body.style.backgroundColor=siteSettings.background_color||"#f4f7f5";
+  document.body.style.backgroundImage=`url("${String(siteSettings.background_image).replace(/["\\]/g,"\\$&")}")`;
+  document.body.style.backgroundSize="cover";
+  document.body.style.backgroundPosition="center top";
+  document.body.style.backgroundAttachment="fixed";
+  document.body.style.backgroundRepeat="no-repeat";
+ }else{
+  document.body.style.backgroundImage="none";
+  document.body.style.backgroundColor=siteSettings.background_color||"#f4f7f5";
+ }
  const title=siteSettings.site_title||"دليل محكمة شبين الكوم الابتدائية";
  document.title=title;const brand=document.querySelector(".brand strong");if(brand)brand.textContent=title;
  const subtitle=document.querySelector(".brand small");if(subtitle&&siteSettings.site_subtitle)subtitle.textContent=siteSettings.site_subtitle;

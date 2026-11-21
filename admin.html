@@ -32,8 +32,20 @@
         <label>رابط فيسبوك<input id="setting-facebook" type="url" placeholder="https://facebook.com/..."></label>
         <label>رابط خدمات وزارة العدل<input id="setting-ministry_url" type="url" value="https://moj.gov.eg/services/courts/10050004"></label>
         <label class="wide">النص أسفل الموقع<input id="setting-footer_text" type="text"></label>
-        <label>صورة خلفية الواجهة<input id="setting-hero_image" type="file" accept="image/*"></label>
+        <label>صورة خلفية الواجهة الرئيسية<input id="setting-hero_image" type="file" accept="image/*"></label>
         <label>اللوجو<input id="setting-logo" type="file" accept="image/*"></label>
+        <div class="wide background-controls">
+          <h3>خلفية الموقع بالكامل</h3>
+          <label>نوع الخلفية
+            <select id="setting-background_mode">
+              <option value="color">لون موحد</option>
+              <option value="image">صورة</option>
+            </select>
+          </label>
+          <label>لون الخلفية<input id="setting-background_color" type="color" value="#f4f7f5"></label>
+          <label>صورة خلفية الموقع<input id="setting-background_image" type="file" accept="image/*"></label>
+          <p class="muted">اختر اللون أو الصورة، وسيتم تطبيق الاختيار على خلفية صفحات الموقع للزوار.</p>
+        </div>
         <div class="wide"><button class="primary" type="submit">حفظ إعدادات الموقع</button></div>
       </form>
       <p class="muted">الصور المرفوعة تظهر للزوار بعد الحفظ. يفضّل استخدام صور مضغوطة لتسريع الموقع.</p>

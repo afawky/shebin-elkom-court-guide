@@ -34,7 +34,7 @@ $("floor-form").addEventListener("submit",async e=>{e.preventDefault();const {er
 $("office-form").addEventListener("submit",async e=>{e.preventDefault();const {error}=await db.from("offices").insert({name:$("office-name").value.trim(),floor_id:$("office-floor").value,room_number:$("office-room").value.trim()||null,location_description:$("office-location").value.trim()||null,phone:$("office-phone").value.trim()||null});if(error)msg("admin-message",error.message,true);else{$("office-form").reset();msg("admin-message","تمت إضافة المكتب.");await refreshAll();}});
 $("service-form").addEventListener("submit",async e=>{e.preventDefault();const {error}=await db.from("services").insert({office_id:$("service-office").value,name:$("service-name").value.trim(),description:$("service-desc").value.trim()||null});if(error)msg("admin-message",error.message,true);else{$("service-form").reset();msg("admin-message","تمت إضافة الخدمة.");await refreshAll();}});
 
-const settingDefaults={site_title:"دليل محكمة شبين الكوم الابتدائية",hero_title:"كيف يمكننا مساعدتك؟",hero_description:"ابحث عن الإدارة أو المكتب أو الخدمة التي تريد الوصول إليها داخل المحكمة.",phone:"",email:"",address:"",facebook:"",ministry_url:"https://moj.gov.eg/services/courts/10050004",footer_text:"دليل إرشادي إلكتروني — محكمة شبين الكوم الابتدائية",hero_image:"",logo:""};
+const settingDefaults={site_title:"دليل محكمة شبين الكوم الابتدائية",hero_title:"كيف يمكننا مساعدتك؟",hero_description:"ابحث عن الإدارة أو المكتب أو الخدمة التي تريد الوصول إليها داخل المحكمة.",phone:"",email:"",address:"",facebook:"",ministry_url:"https://moj.gov.eg/services/courts/10050004",footer_text:"دليل إرشادي إلكتروني — محكمة شبين الكوم الابتدائية",hero_image:"",logo:"",background_mode:"color",background_color:"#f4f7f5",background_image:""};
 let siteSettings={...settingDefaults};
 async function loadSiteSettings(){
  const {data,error}=await db.from("site_settings").select("*").eq("id",1).maybeSingle();
@@ -47,6 +47,9 @@ async function loadSiteSettings(){
    footer_text:data.footer_text??settingDefaults.footer_text,
    phone:data.contact_phone??"", email:data.contact_email??"", address:data.contact_address??"",
    facebook:data.facebook_url??"", hero_image:data.hero_image_url??"", logo:data.logo_url??"",
+   background_mode:data.background_mode??settingDefaults.background_mode,
+   background_color:data.background_color??settingDefaults.background_color,
+   background_image:data.background_image_url??"",
    ministry_url:settingDefaults.ministry_url
   };
  }
@@ -65,14 +68,17 @@ async function uploadAsset(file,folder){
 $("settings-form").addEventListener("submit",async e=>{
  e.preventDefault();msg("admin-message","جارٍ حفظ الإعدادات...");
  try{
-  const keys=Object.keys(settingDefaults).filter(k=>k!=="hero_image"&&k!=="logo");
-  const values={};keys.forEach(k=>values[k]=$("setting-"+k).value.trim());
-  for(const [key,folder] of [["hero_image","site"],["logo","site"]]){const file=$("setting-"+key).files[0];if(file)values[key]=await uploadAsset(file,folder);else values[key]=siteSettings[key]||"";}
+  const keys=Object.keys(settingDefaults).filter(k=>!["hero_image","logo","background_image"].includes(k));
+  const values={};keys.forEach(k=>{const el=$("setting-"+k);values[k]=el.type==="color"?el.value:el.value.trim();});
+  for(const [key,folder] of [["hero_image","site"],["logo","site"],["background_image","site"]]){const file=$("setting-"+key).files[0];if(file)values[key]=await uploadAsset(file,folder);else values[key]=siteSettings[key]||"";}
   const row={
    site_title:values.site_title, hero_title:values.hero_title, hero_description:values.hero_description,
    footer_text:values.footer_text, contact_phone:values.phone, contact_email:values.email,
    contact_address:values.address, facebook_url:values.facebook,
    hero_image_url:values.hero_image||null, logo_url:values.logo||null,
+   background_mode:values.background_mode,
+   background_color:values.background_color,
+   background_image_url:values.background_image||null,
    updated_at:new Date().toISOString()
   };
   const {error}=await db.from("site_settings").update(row).eq("id",1);

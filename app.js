@@ -18,7 +18,22 @@ async function loadDirectory(){
   const error = f.error || o.error || s.error || settings.error || images.error;
   if(error){directory.innerHTML='<div class="empty">تعذر تحميل البيانات. تأكد من إعداد قاعدة البيانات وسياسات القراءة.</div>';document.getElementById("status").textContent=error.message;return;}
   allFloors=f.data||[];allOffices=o.data||[];allServices=s.data||[];allOfficeImages=images.data||[];
-  (settings.data||[]).forEach(r=>{let v=r.setting_value;if(v&&typeof v==="object"&&"value" in v)v=v.value;siteSettings[r.setting_key]=v??"";});
+  // site_settings uses one row (id=1) with named columns, not setting_key/setting_value pairs.
+  const row = (settings.data||[])[0] || {};
+  siteSettings = {
+    site_title: row.site_title || "دليل محكمة شبين الكوم الابتدائية",
+    site_subtitle: row.site_subtitle || "المحكمة الابتدائية",
+    hero_title: row.hero_title || "كيف يمكننا مساعدتك؟",
+    hero_description: row.hero_description || "ابحث عن الإدارة أو المكتب أو الخدمة التي تريد الوصول إليها داخل المحكمة.",
+    footer_text: row.footer_text || "دليل إرشادي إلكتروني — محكمة شبين الكوم الابتدائية",
+    phone: row.contact_phone || "",
+    email: row.contact_email || "",
+    address: row.contact_address || "",
+    facebook: row.facebook_url || "",
+    hero_image: row.hero_image_url || "",
+    logo: row.logo_url || "",
+    ministry_url: "https://moj.gov.eg/services/courts/10050004"
+  };
   applySiteSettings();
   document.getElementById("floor-count").textContent=allFloors.length;
   document.getElementById("office-count").textContent=allOffices.length;
@@ -28,6 +43,7 @@ async function loadDirectory(){
 function applySiteSettings(){
  const title=siteSettings.site_title||"دليل محكمة شبين الكوم الابتدائية";
  document.title=title;const brand=document.querySelector(".brand strong");if(brand)brand.textContent=title;
+ const subtitle=document.querySelector(".brand small");if(subtitle&&siteSettings.site_subtitle)subtitle.textContent=siteSettings.site_subtitle;
  const heroTitle=document.querySelector(".hero h1");if(heroTitle&&siteSettings.hero_title)heroTitle.textContent=siteSettings.hero_title;
  const heroDesc=document.querySelector(".hero p");if(heroDesc&&siteSettings.hero_description)heroDesc.textContent=siteSettings.hero_description;
  const hero=document.querySelector(".hero");if(hero&&siteSettings.hero_image)hero.style.backgroundImage=`linear-gradient(90deg,rgba(12,45,39,.88),rgba(12,45,39,.72)),url("${siteSettings.hero_image}")`;

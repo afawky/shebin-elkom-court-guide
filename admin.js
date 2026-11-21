@@ -23,15 +23,61 @@ async function refreshAll(){
  const [f,o,s]=await Promise.all([db.from("floors").select("*").order("sort_order"),db.from("offices").select("*").order("name"),db.from("services").select("*").order("name")]);
  if(f.error||o.error||s.error){msg("admin-message",(f.error||o.error||s.error).message,true);return;}
  window.floors=f.data||[];window.offices=o.data||[];window.services=s.data||[];
+ const imgs=await db.from("office_images").select("*").order("created_at");
+ window.officeImages=imgs.data||[];
  $("office-floor").innerHTML=window.floors.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
  $("service-office").innerHTML=window.offices.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
  renderRecords();
+ await loadSiteSettings();
 }
 $("floor-form").addEventListener("submit",async e=>{e.preventDefault();const {error}=await db.from("floors").insert({name:$("floor-name").value.trim(),description:$("floor-desc").value.trim()||null});if(error)msg("admin-message",error.message,true);else{$("floor-form").reset();msg("admin-message","تمت إضافة الدور.");await refreshAll();}});
 $("office-form").addEventListener("submit",async e=>{e.preventDefault();const {error}=await db.from("offices").insert({name:$("office-name").value.trim(),floor_id:$("office-floor").value,room_number:$("office-room").value.trim()||null,location_description:$("office-location").value.trim()||null,phone:$("office-phone").value.trim()||null});if(error)msg("admin-message",error.message,true);else{$("office-form").reset();msg("admin-message","تمت إضافة المكتب.");await refreshAll();}});
 $("service-form").addEventListener("submit",async e=>{e.preventDefault();const {error}=await db.from("services").insert({office_id:$("service-office").value,name:$("service-name").value.trim(),description:$("service-desc").value.trim()||null});if(error)msg("admin-message",error.message,true);else{$("service-form").reset();msg("admin-message","تمت إضافة الخدمة.");await refreshAll();}});
+
+const settingDefaults={site_title:"دليل محكمة شبين الكوم الابتدائية",hero_title:"كيف يمكننا مساعدتك؟",hero_description:"ابحث عن الإدارة أو المكتب أو الخدمة التي تريد الوصول إليها داخل المحكمة.",phone:"",email:"",address:"",facebook:"",ministry_url:"https://moj.gov.eg/services/courts/10050004",footer_text:"دليل إرشادي إلكتروني — محكمة شبين الكوم الابتدائية",hero_image:"",logo:""};
+let siteSettings={...settingDefaults};
+async function loadSiteSettings(){
+ const {data,error}=await db.from("site_settings").select("setting_key,setting_value");
+ if(error){msg("admin-message","تعذر قراءة إعدادات الموقع: "+error.message,true);return;}
+ (data||[]).forEach(r=>{let v=r.setting_value;if(v&&typeof v==="object"&&"value" in v)v=v.value;siteSettings[r.setting_key]=v??"";});
+ Object.keys(settingDefaults).forEach(k=>{const el=$("setting-"+k);if(el&&el.type!=="file")el.value=siteSettings[k]??settingDefaults[k];});
+}
+async function uploadAsset(file,folder){
+ if(!file)return null;
+ if(!file.type.startsWith("image/"))throw new Error("يرجى اختيار ملف صورة.");
+ if(file.size>6*1024*1024)throw new Error("حجم الصورة أكبر من 6 ميجابايت.");
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
+ const path=`${folder}/${crypto.randomUUID()}.${ext||"jpg"}`;
+ const {error}=await db.storage.from("court-assets").upload(path,file,{upsert:false,contentType:file.type});
+ if(error)throw error;
+ return db.storage.from("court-assets").getPublicUrl(path).data.publicUrl;
+}
+$("settings-form").addEventListener("submit",async e=>{
+ e.preventDefault();msg("admin-message","جارٍ حفظ الإعدادات...");
+ try{
+  const keys=Object.keys(settingDefaults).filter(k=>k!=="hero_image"&&k!=="logo");
+  const values={};keys.forEach(k=>values[k]=$("setting-"+k).value.trim());
+  for(const [key,folder] of [["hero_image","site"],["logo","site"]]){const file=$("setting-"+key).files[0];if(file)values[key]=await uploadAsset(file,folder);else values[key]=siteSettings[key]||"";}
+  const rows=Object.entries(values).map(([setting_key,value])=>({setting_key,setting_value:value}));
+  const {error}=await db.from("site_settings").upsert(rows,{onConflict:"setting_key"});
+  if(error)throw error;
+  siteSettings={...siteSettings,...values};msg("admin-message","تم حفظ إعدادات الموقع بنجاح.");
+ }catch(err){msg("admin-message","تعذر الحفظ: "+err.message,true);}
+});
+window.uploadOfficeImages=async officeId=>{
+ const input=$("office-files-"+officeId);const files=[...(input?.files||[])];if(!files.length){msg("admin-message","اختر صورة واحدة على الأقل.",true);return;}
+ try{for(const file of files){const url=await uploadAsset(file,`offices/${officeId}`);const path=url.split("/court-assets/")[1];const {error}=await db.from("office_images").insert({office_id:officeId,image_url:url,storage_path:path});if(error)throw error;}
+  msg("admin-message","تم رفع صور المكتب.");if(input)input.value="";await refreshAll();
+ }catch(err){msg("admin-message","تعذر رفع الصور: "+err.message,true);}
+};
+window.deleteOfficeImage=async imageId=>{
+ const item=(window.officeImages||[]).find(x=>x.id===imageId);if(!item||!confirm("حذف هذه الصورة؟"))return;
+ const {error}=await db.from("office_images").delete().eq("id",imageId);if(error){msg("admin-message",error.message,true);return;}
+ if(item.storage_path)await db.storage.from("court-assets").remove([item.storage_path]);msg("admin-message","تم حذف الصورة.");await refreshAll();
+};
+
 function renderRecords(){
- const officeRows=window.offices.map(o=>{const floor=window.floors.find(f=>f.id===o.floor_id);const services=window.services.filter(s=>s.office_id===o.id);return `<div class="record-row"><div><strong>${esc(o.name)} ${o.room_number?`— غرفة ${esc(o.room_number)}`:""}</strong><small>${esc(floor?.name||"دون دور محدد")} · ${services.length} خدمة ${o.is_active?"":"· مخفي"}</small><div class="inline-edit"><input id="rename-${o.id}" value="${esc(o.name)}" aria-label="اسم المكتب"><button class="secondary" onclick="renameOffice('${o.id}')">تعديل الاسم</button></div></div><div class="record-actions"><button class="secondary" onclick="toggleOffice('${o.id}',${!o.is_active})">${o.is_active?"إخفاء":"تفعيل"}</button><button class="danger" onclick="deleteOffice('${o.id}')">حذف</button></div></div>`;}).join("");
+ const officeRows=window.offices.map(o=>{const floor=window.floors.find(f=>f.id===o.floor_id);const services=window.services.filter(s=>s.office_id===o.id);return `<div class="record-row"><div><strong>${esc(o.name)} ${o.room_number?`— غرفة ${esc(o.room_number)}`:""}</strong><small>${esc(floor?.name||"دون دور محدد")} · ${services.length} خدمة ${o.is_active?"":"· مخفي"}</small><div class="inline-edit"><input id="rename-${o.id}" value="${esc(o.name)}" aria-label="اسم المكتب"><button class="secondary" onclick="renameOffice('${o.id}')">تعديل الاسم</button></div><div class="office-photo-admin">${(window.officeImages||[]).filter(im=>im.office_id===o.id).map(im=>`<span class="admin-thumb"><img src="${esc(im.image_url)}" alt=""><button type="button" class="danger" onclick="deleteOfficeImage('${im.id}')">×</button></span>`).join("")}<input id="office-files-${o.id}" type="file" accept="image/*" multiple aria-label="صور المكتب"><button class="secondary" onclick="uploadOfficeImages('${o.id}')">رفع صور المكتب</button></div></div><div class="record-actions"><button class="secondary" onclick="toggleOffice('${o.id}',${!o.is_active})">${o.is_active?"إخفاء":"تفعيل"}</button><button class="danger" onclick="deleteOffice('${o.id}')">حذف</button></div></div>`;}).join("");
  const floorRows=window.floors.map(f=>`<div class="record-row"><div><strong>${esc(f.name)}</strong><small>${f.is_active?"مفعل":"مخفي"}</small></div><div class="record-actions"><button class="secondary" onclick="toggleFloor('${f.id}',${!f.is_active})">${f.is_active?"إخفاء":"تفعيل"}</button><button class="danger" onclick="deleteFloor('${f.id}')">حذف</button></div></div>`).join("");
  $("admin-records").innerHTML=`<div class="record-group"><h3>الأدوار</h3>${floorRows||'<p class="muted">لا توجد أدوار بعد.</p>'}</div><div class="record-group"><h3>المكاتب</h3>${officeRows||'<p class="muted">لا توجد مكاتب بعد.</p>'}</div>`;
 }

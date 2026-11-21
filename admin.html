@@ -20,6 +20,24 @@
       <section class="panel"><h2>إضافة مكتب</h2><form id="office-form"><label>اسم المكتب<input id="office-name" required placeholder="مثال: قلم الكتاب"></label><label>الدور<select id="office-floor" required></select></label><label>رقم الغرفة<input id="office-room" placeholder="مثال: 105"></label><label>وصف الوصول<textarea id="office-location" rows="2" placeholder="وصف يساعد الزائر على الوصول"></textarea></label><label>رقم الهاتف<input id="office-phone"></label><button class="primary">إضافة المكتب</button></form></section>
       <section class="panel"><h2>إضافة خدمة</h2><form id="service-form"><label>المكتب<select id="service-office" required></select></label><label>اسم الخدمة<input id="service-name" required placeholder="مثال: استخراج صورة رسمية"></label><label>تفاصيل الخدمة<textarea id="service-desc" rows="2"></textarea></label><button class="primary">إضافة الخدمة</button></form></section>
     </div>
+    <section class="panel site-settings-panel">
+      <div class="section-head"><div><span class="eyebrow">تخصيص الواجهة</span><h2>إعدادات الموقع وبيانات التواصل</h2></div></div>
+      <form id="settings-form" class="settings-grid">
+        <label>اسم الموقع<input id="setting-site_title" placeholder="دليل محكمة شبين الكوم الابتدائية"></label>
+        <label>العنوان الرئيسي<input id="setting-hero_title" placeholder="كيف يمكننا مساعدتك؟"></label>
+        <label class="wide">وصف الواجهة<textarea id="setting-hero_description" rows="2"></textarea></label>
+        <label>رقم الهاتف<input id="setting-phone" type="text"></label>
+        <label>البريد الإلكتروني<input id="setting-email" type="email"></label>
+        <label class="wide">عنوان المحكمة<input id="setting-address" type="text"></label>
+        <label>رابط فيسبوك<input id="setting-facebook" type="url" placeholder="https://facebook.com/..."></label>
+        <label>رابط خدمات وزارة العدل<input id="setting-ministry_url" type="url" value="https://moj.gov.eg/services/courts/10050004"></label>
+        <label class="wide">النص أسفل الموقع<input id="setting-footer_text" type="text"></label>
+        <label>صورة خلفية الواجهة<input id="setting-hero_image" type="file" accept="image/*"></label>
+        <label>اللوجو<input id="setting-logo" type="file" accept="image/*"></label>
+        <div class="wide"><button class="primary" type="submit">حفظ إعدادات الموقع</button></div>
+      </form>
+      <p class="muted">الصور المرفوعة تظهر للزوار بعد الحفظ. يفضّل استخدام صور مضغوطة لتسريع الموقع.</p>
+    </section>
     <section class="panel records"><div class="section-head"><div><span class="eyebrow">المحتوى الحالي</span><h2>المكاتب والخدمات</h2></div><button id="refresh" class="secondary">تحديث القائمة</button></div><div id="admin-records">جارٍ التحميل...</div></section>
     <p id="admin-message" class="status" role="status"></p>
   </section>

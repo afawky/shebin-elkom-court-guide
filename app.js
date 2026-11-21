@@ -12,7 +12,7 @@ async function loadDirectory(){
     db.from("floors").select("*").eq("is_active",true).order("sort_order").order("name"),
     db.from("offices").select("*").eq("is_active",true).order("sort_order").order("name"),
     db.from("services").select("*").eq("is_active",true).order("name"),
-    db.from("site_settings").select("setting_key,setting_value"),
+    db.from("site_settings").select("*").eq("id",1),
     db.from("office_images").select("*").order("created_at")
   ]);
   const error = f.error || o.error || s.error || settings.error || images.error;

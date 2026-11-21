@@ -37,9 +37,19 @@ $("service-form").addEventListener("submit",async e=>{e.preventDefault();const {
 const settingDefaults={site_title:"دليل محكمة شبين الكوم الابتدائية",hero_title:"كيف يمكننا مساعدتك؟",hero_description:"ابحث عن الإدارة أو المكتب أو الخدمة التي تريد الوصول إليها داخل المحكمة.",phone:"",email:"",address:"",facebook:"",ministry_url:"https://moj.gov.eg/services/courts/10050004",footer_text:"دليل إرشادي إلكتروني — محكمة شبين الكوم الابتدائية",hero_image:"",logo:""};
 let siteSettings={...settingDefaults};
 async function loadSiteSettings(){
- const {data,error}=await db.from("site_settings").select("setting_key,setting_value");
+ const {data,error}=await db.from("site_settings").select("*").eq("id",1).maybeSingle();
  if(error){msg("admin-message","تعذر قراءة إعدادات الموقع: "+error.message,true);return;}
- (data||[]).forEach(r=>{let v=r.setting_value;if(v&&typeof v==="object"&&"value" in v)v=v.value;siteSettings[r.setting_key]=v??"";});
+ if(data){
+  siteSettings={...settingDefaults,
+   site_title:data.site_title??settingDefaults.site_title,
+   hero_title:data.hero_title??settingDefaults.hero_title,
+   hero_description:data.hero_description??settingDefaults.hero_description,
+   footer_text:data.footer_text??settingDefaults.footer_text,
+   phone:data.contact_phone??"", email:data.contact_email??"", address:data.contact_address??"",
+   facebook:data.facebook_url??"", hero_image:data.hero_image_url??"", logo:data.logo_url??"",
+   ministry_url:settingDefaults.ministry_url
+  };
+ }
  Object.keys(settingDefaults).forEach(k=>{const el=$("setting-"+k);if(el&&el.type!=="file")el.value=siteSettings[k]??settingDefaults[k];});
 }
 async function uploadAsset(file,folder){
@@ -58,8 +68,14 @@ $("settings-form").addEventListener("submit",async e=>{
   const keys=Object.keys(settingDefaults).filter(k=>k!=="hero_image"&&k!=="logo");
   const values={};keys.forEach(k=>values[k]=$("setting-"+k).value.trim());
   for(const [key,folder] of [["hero_image","site"],["logo","site"]]){const file=$("setting-"+key).files[0];if(file)values[key]=await uploadAsset(file,folder);else values[key]=siteSettings[key]||"";}
-  const rows=Object.entries(values).map(([setting_key,value])=>({setting_key,setting_value:value}));
-  const {error}=await db.from("site_settings").upsert(rows,{onConflict:"setting_key"});
+  const row={
+   site_title:values.site_title, hero_title:values.hero_title, hero_description:values.hero_description,
+   footer_text:values.footer_text, contact_phone:values.phone, contact_email:values.email,
+   contact_address:values.address, facebook_url:values.facebook,
+   hero_image_url:values.hero_image||null, logo_url:values.logo||null,
+   updated_at:new Date().toISOString()
+  };
+  const {error}=await db.from("site_settings").update(row).eq("id",1);
   if(error)throw error;
   siteSettings={...siteSettings,...values};msg("admin-message","تم حفظ إعدادات الموقع بنجاح.");
  }catch(err){msg("admin-message","تعذر الحفظ: "+err.message,true);}
